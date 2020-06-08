@@ -13,11 +13,42 @@ def get_datetime():
     return dt_string
 
 
+class SelectionPage(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        mainframe = tk.Frame(self)
+        mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+        mainframe.columnconfigure(0, weight=1)
+        mainframe.rowconfigure(0, weight=1)
+        mainframe.pack(pady=100, padx=100)
+        tkvar = StringVar(self)
+        choices = {'add_sub', 'add'}
+        Label(mainframe, text="Choose a test").grid(row=1, column=1)
+        popupMenu = OptionMenu(mainframe, tkvar, *choices)
+        popupMenu.config(width=20)
+
+        popupMenu.grid(row=2, column=1)
+
+
+        def start_practice():
+            print(tkvar.get())
+            time = 180
+
+            tol = 0.1 # approximation error tol
+            root = Tk()
+            choices_dict = {'add_sub': ['add', 'sub'],
+                            'add': ['add']}
+
+            app = App(root, time, tol, choices_dict[tkvar.get()])
+            root.mainloop()
+
+        MyButton1 = Button(mainframe, text="Submit", width=10, command=start_practice)
+        MyButton1.grid(row=3, column=1)
+
+
 
 class App(tk.Frame):
-    #def __init__(self, parent, *args, **kwargs):
-    #    tk.Frame.__init__(self, parent, *args, **kwargs)
-    def __init__(self, parent, time, tol):
+    def __init__(self, parent, time, tol, choices):
         tk.Frame.__init__(self, parent)
         self.count = time
         self.scr = 0
@@ -25,9 +56,12 @@ class App(tk.Frame):
         self.exact = True
         self.tol = tol
 
-        self.tests = []
+        self.choices = choices
 
         self.parent = parent
+
+
+
         self.parent.title("MENTAL MATH QUANT GRIND")
         self.parent.geometry("700x130")
 
@@ -41,7 +75,8 @@ class App(tk.Frame):
         self.timer = Label(self, text="Seconds left: 1")
         self.score = Label(self, text="score: 0")
 
-        motive = "[Chorus] Inspirational Music here!!."
+        motive = "[Chorus] Just like Citadel, Jane Street, Two Sigma, Akuna" \
+                 "\nAll I need, yeah, you're all I need."
 
         self.motive = Label(self, text=motive, font=("Helvetica", 10, "italic"))
 
@@ -127,8 +162,9 @@ class App(tk.Frame):
             self.ans = x * 12
             return prompt
 
-        #self.tests = [add]
-        self.tests = [add, sub]
+        this_fn = locals()
+        self.tests = [this_fn[i] for i in self.choices]
+        #self.tests = [add, sub]
 
         #self.tests = [sub]
         #self.tests = [mul12]
@@ -155,7 +191,7 @@ class App(tk.Frame):
             self.correct_ans["text"] = self.prompt["text"] + ('%.3f'% self.ans)
             prompt = self.next_question()
             self.prompt["text"] = prompt
-            self.speak(prompt)
+            #self.speak(prompt)
             self.scr += 1
             self.answer.delete(0, 'end')
         else:
@@ -175,21 +211,27 @@ class App(tk.Frame):
             self.parent.after(1000, self.onUpdate)
 
 if __name__ == '__main__':
-    root = Tk()
-    time = 12
+    # https://pythonspot.com/tk-dropdown-example/
+    #root = Tk()
+    #time = 180
 
-    tol = 0.1 # approximation error tol
+    #tol = 0.1 # approximation error tol
 
-    app = App(root, time, tol)
-    root.mainloop()
+    #app = App(root, time, tol)
+    #root.mainloop()
 
-    # LOGGING
-    datetime = get_datetime()
-    log_score = "grind_sheet.txt"
-    log = datetime + " | " + "score = " + str(app.scr) + " | " + "time = " \
-          + str(time) + " | " + "tests = " + " ;".join([fn.__name__ for fn in app.tests]) \
-          + "\n"
+    ## LOGGING
+    # LEGACY
+    #datetime = get_datetime()
+    #log_score = "grind_sheet.txt"
+    #log = datetime + " | " + "score = " + str(app.scr) + " | " + "time = " \
+    #      + str(time) + " | " + "tests = " + " ;".join([fn.__name__ for fn in app.tests]) \
+    #      + "\n"
 
-    print("Result >>", log)
-    with open(log_score, "a") as f:
-        f.write(log)
+    #print("Result >>", log)
+    #with open(log_score, "a") as f:
+    #    f.write(log)
+
+    app = SelectionPage()
+    app.mainloop()
+
